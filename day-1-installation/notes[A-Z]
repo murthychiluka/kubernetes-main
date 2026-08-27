@@ -1,4 +1,4 @@
-```text
+
 ------------------------------ Kubernetes---------------------------------------------
 
 Kubernetes is a container orchestration system that was initially designed by Google to help scale
@@ -1922,4 +1922,4 @@ Note:
 pleae click below git hub link for all yml files
 
 https://github.com/CloudTechDevOps/Kubernetes
- ```
+ 
