@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dns-client
+spec:
+  containers:
+  - name: dns-client
+    image: busybox
+    command: ["sleep", "3600"]
+
+
+
+after apply login pod and test svc 
+
+kubectl exec -it dns-client -- sh
+
+nslookup <svcname>  # clusterIp
+#test both servcies headless and clusterip and observer how traffic is routing 
+
+<pod-name>.<headless-service-name>.<namespace>.svc.cluster.local
+
+nslookup mysql-0.mysql-clusterip.default.svc.cluster.local
+nslookup mysql-1.mysql-clusterip.default.svc.cluster.local
+nslookup mysql-2.mysql-clusterip.default.svc.cluster.local
+
+<podname><headless>.defualt.svc.cluster.local
+"mysql-0.mysql-clusterip.default.svc.cluster.local" 
+
+
+

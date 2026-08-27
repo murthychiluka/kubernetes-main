@@ -1,0 +1,92 @@
+For a StatefulSet with 3 replicas, Kubernetes will automatically create 3 PVCs and 3 EBS volumes.
+
+Prerequisite
+
+Your EKS cluster must have the Amazon EBS CSI driver installed/configured.
+
+You can check:
+
+kubectl get pods -n kube-system | grep ebs
+
+You should see something similar to:
+
+ebs-csi-controller-xxxxx
+ebs-csi-node-xxxxx
+
+  
+You apply just one YAML:
+
+kubectl apply -f mysql-dynamic.yaml
+
+Kubernetes sees:
+
+replicas: 3
+
+and:
+
+volumeClaimTemplates:
+
+It automatically creates:
+
+mysql-data-mysql-0
+mysql-data-mysql-1
+mysql-data-mysql-2
+
+Then the StorageClass:
+
+mysql-ebs
+
+uses:
+
+ebs.csi.aws.com
+
+to dynamically provision EBS volumes.
+
+The final architecture becomes:
+
+                  StatefulSet
+                  MySQL x 3
+                       │
+          volumeClaimTemplates
+                       │
+        ┌──────────────┼──────────────┐
+        ↓              ↓              ↓
+      PVC-0          PVC-1          PVC-2
+        │              │              │
+        ↓              ↓              ↓
+     EBS-0           EBS-1           EBS-2
+      5 GiB           5 GiB           5 GiB
+        │              │              │
+        ↓              ↓              ↓
+    mysql-0         mysql-1         mysql-2
+Compare with your previous setup
+
+Previous manual setup:
+
+You manually created:
+
+3 PV YAMLs
+     ↓
+3 PVCs automatically created
+     ↓
+3 MySQL Pods
+
+Now dynamic setup:
+
+You create:
+
+StorageClass
+     ↓
+volumeClaimTemplates
+     ↓
+PVC automatically created
+     ↓
+EBS volume automatically created
+     ↓
+PV automatically created
+     ↓
+MySQL Pod
+
+So with dynamic provisioning:
+
+You don't write any PV YAML. Kubernetes creates the PV and EBS volume for you.

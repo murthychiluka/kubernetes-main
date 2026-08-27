@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-probes-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-probes-demo
+  template:
+    metadata:
+      labels:
+        app: python-probes-demo
+    spec:
+      containers:
+        - name: python-app
+          image: <your-dockerhub>/python-probes-demo:1.0
+          ports:
+            - containerPort: 8080
+
+          # Startup probe: checks if app is initialized
+          startupProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            failureThreshold: 10
+            periodSeconds: 5
+
+          # Liveness probe: checks if app is alive
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # Readiness probe: checks if app is ready for traffic
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 3

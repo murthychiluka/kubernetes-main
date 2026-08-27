@@ -1,0 +1,127 @@
+# ============================================================
+# 1. StorageClass - Dynamic EBS Provisioning
+# ============================================================
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mysql-ebs
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+
+parameters:
+  type: gp3
+  fsType: ext4
+
+---
+# ============================================================
+# 2. Headless Service
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  clusterIP: None
+
+  selector:
+    app: mysql
+
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+
+---
+# ============================================================
+# 3. MySQL StatefulSet
+# ============================================================
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+
+spec:
+  serviceName: mysql
+
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: mysql
+
+  template:
+    metadata:
+      labels:
+        app: mysql
+
+    spec:
+      containers:
+        - name: mysql
+
+          image: mysql:8.0
+
+          ports:
+            - name: mysql
+              containerPort: 3306
+
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "rootpassword"
+
+            - name: MYSQL_DATABASE
+              value: "mydb"
+
+            - name: MYSQL_USER
+              value: "myuser"
+
+            - name: MYSQL_PASSWORD
+              value: "mypassword"
+
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -u root -p"$MYSQL_ROOT_PASSWORD"
+
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -u root -p"$MYSQL_ROOT_PASSWORD"
+
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+
+  # ==========================================================
+  # PVC TEMPLATE
+  # Kubernetes automatically creates 3 PVCs
+  # ==========================================================
+  volumeClaimTemplates:
+
+    - metadata:
+        name: mysql-data
+
+      spec:
+        storageClassName: mysql-ebs
+
+        accessModes:
+          - ReadWriteOnce
+
+        resources:
+          requests:
+            storage: 5Gi
