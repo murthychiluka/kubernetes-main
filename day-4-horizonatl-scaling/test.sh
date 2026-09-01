@@ -5,7 +5,7 @@ for j in {1..10}; do
     wait  # Wait for all background curl processes to finish before next iteration
 done
 
-```text
+
 You can create a temporary CPU-load pod:
 
 kubectl run cpu-load \
@@ -16,4 +16,4 @@ kubectl run cpu-load \
 Then watch:
 
 kubectl get hpa -w
-```
+
