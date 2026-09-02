@@ -1,3 +1,4 @@
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -7,12 +8,12 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/CloudTechDevOps/Kubernetes.git
+    repoURL: https://github.com/murthychiluka/kubernetes-main.git
     targetRevision: HEAD
-    path: day-14-argocd
+    path: day-4-horizontal-scaling
   destination: 
     server: https://kubernetes.default.svc
-    namespace: myapp
+    namespace: test
 
   syncPolicy:
     syncOptions:
