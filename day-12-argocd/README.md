@@ -280,3 +280,59 @@ SSH keys
 Repository secrets
 Argo CD continuously monitors Git and Kubernetes to maintain desired application state.
 ```
+*****************************
+```text
+Kustomize files are configuration files used by Kustomize, a Kubernetes configuration management tool.
+
+Instead of creating completely separate YAML files for each environment, you create a base configuration and then use Kustomize overlays to customize it.
+
+Example
+
+You might have:
+
+my-app/
+├── base/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   └── kustomization.yaml
+│
+└── overlays/
+    ├── dev/
+    │   └── kustomization.yaml
+    └── prod/
+        └── kustomization.yaml
+
+The kustomization.yaml file tells Kustomize which Kubernetes YAML files to combine and what modifications to apply.
+
+For example:
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+namePrefix: dev-
+
+Kustomize can take these files and generate the final Kubernetes manifests that are applied to the cluster.
+
+In Argo CD
+
+Argo CD can point to a Git repository containing Kustomize configuration:
+
+Git Repository
+      ↓
+Kustomize files
+      ↓
+Argo CD
+      ↓
+Generated Kubernetes manifests
+      ↓
+Kubernetes cluster
+
+So when you hear:
+
+"Argo CD monitors Kubernetes manifests, Helm charts, and Kustomize files"
+
+it means Argo CD can work with plain YAML, Helm-based applications, or Kustomize-based configurations stored in Git.
+
+👉 Simple definition: Kustomize files are Kubernetes configuration files, centered around kustomization.yaml, that let you customize and reuse YAML manifests for different environments.
+```
