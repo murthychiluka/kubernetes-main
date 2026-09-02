@@ -336,3 +336,33 @@ it means Argo CD can work with plain YAML, Helm-based applications, or Kustomize
 
 👉 Simple definition: Kustomize files are Kubernetes configuration files, centered around kustomization.yaml, that let you customize and reuse YAML manifests for different environments.
 ```
+```text
+
+In the argocd i want to use a private repo app;
+
+ If your Kubernetes manifests are in a private GitHub repository, Argo CD needs credentials to access that repository.
+
+Assuming you're using Argo CD with GitHub, there are two common ways.
+
+Option 1 — Argo CD UI
+
+In the Argo CD UI:
+
+Settings → Repositories → Connect Repo
+
+Choose:
+
+Connection Method: HTTPS
+Type: git
+Repository URL: https://github.com/<username>/<private-repo>.git
+Username: <github-username>
+Password: <GitHub PAT>
+
+For GitHub, use a Personal Access Token (PAT) rather than your GitHub account password.
+
+Then click Connect.
+
+You should see the repository as:
+
+Successful
+```
