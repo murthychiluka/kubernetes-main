@@ -21,8 +21,8 @@ spec:
     spec:
       containers:
         - name: myapp
-          image: 483216680875.dkr.ecr.ap-south-1.amazonaws.com/hotstar:latest #apply rollback deployment after changing the version  
+          image: nginx
           ports:
             - name: http
-              containerPort: 8181
+              containerPort: 80
           
