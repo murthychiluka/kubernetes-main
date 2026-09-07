@@ -1,1 +1,246 @@
+```text
+Deployment of Prometheus and Grafana using Helm in EKS Cluster
+
+1. Install Prometheus and Grafana using Helm
+
+2. Prometheus server processes and stores metrics data
+
+3. Alert manager sends alerts to any systems/channels
+
+4. Grafana visualize scraped data in UI
+
+Press enter or click to view image in full size
+
+Prerequisite:
+1. EC2 instance t2.micro
+
+2. Helm
+
+3. Security Groups Configured properly
+
+Note if you don’t have helm installed you can follow these commands to install it
+
+$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
+Step 2: Things to Know before starting
+1. Why use helm?
+
+Helm is a package manager for Kubernetes. Helm simplifies the installation of all components in one command. install using helm is recommended as you will not be missing any configuration steps and very efficient
+
+2. What is Prometheus?
+
+· Prometheus is an open-source monitoring tool
+
+· Provides out-of-the-box monitoring capabilities for the Kubernetes container orchestration platform. It can monitor servers and databases as well.
+
+· Collects and stores metrics as time-series data, recording information with a timestamp
+
+· It is based on pull and collects metrics from targets by scraping metrics HTTP endpoints.
+
+3. What is Grafana?
+
+· Grafana is an open-source visualization and analytics software.
+
+· It allows you to query, visualize, alert on, and explore your metrics no matter where they are stored.
+
+Steps
+
+Step-1. We need to add the Helm Stable Charts for your local client. Execute the below command:
+
+helm repo add stable https://charts.helm.sh/stable
+Press enter or click to view image in full size
+
+Step2: Add Prometheus Helm repo
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+Press enter or click to view image in full size
+
+Step 3: Create Prometheus namespace
+
+kubectl create namespace prometheus
+Press enter or click to view image in full size
+
+helm install stable prometheus-community/kube-prometheus-stack -n prometheus
+Press enter or click to view image in full size
+
+above command is used to install kube-Prometheus-stack. The helm repo kube-stack-Prometheus comes with a Grafana deployment embedded ( as the default one ).
+Now Prometheus is installed using helm in the ec2 instance
+
+To check whether Prometheus is installed or not use the below command
+kubectl get pods -n prometheus
+Press enter or click to view image in full size
+
+to check the services file (svc) of the Prometheus
+
+kubectl get svc -n prometheus
+Press enter or click to view image in full size
+
+Grafana will be coming along with Prometheus as the stable version
+This output is conformation that our Prometheus is installed successfully
+there is no need of installing Grafana as a separate tool it comes along with Prometheus
+
+let’s expose Prometheus and Grafan to the external world
+there are 2 ways to expose
+
+through Node Port
+through LoadBalancer
+let’s go with the LoadBalancer
+to attach the load balancer we need to change from ClusterIP to LoadBalancer
+command to get the svc file
+
+kubectl edit svc stable-kube-prometheus-sta-prometheus -n prometheus
+Press enter or click to view image in full size
+
+change it from Cluster IP to LoadBalancer after changing make sure you save the file
+Press enter or click to view image in full size
+
+you guys can see I have a load balancer for my Prometheus which I can access from that link
+
+Press enter or click to view image in full size
+
+Press enter or click to view image in full size
+
+we can use a Prometheus UI for monitoring the EKSbut the UI of Prometheus is not a convent for the user Grafana will extract the matrix from the Prometheus UI and show it in a user-friendly manner
+
+let’s change the SVC file of the Grafana and expose it to the outer world
+
+command to edit the SVC file of grafana
+
+kubectl edit svc stable-grafana -n prometheus
+Press enter or click to view image in full size
+
+Press enter or click to view image in full size
+
+the Grafana LoadBalancer also exposed
+
+Get Veerababu Narni’s stories in your inbox
+Join Medium for free to get updates from this writer.
+
+Enter your email
+Subscribe
+
+Remember me for faster sign in
+
+use the link of the LoadBalancer and access from the Browser
+
+Press enter or click to view image in full size
+
+kubectl get secret --namespace prometheus stable-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+use the above command to get the password
+the user name is admin
+
+Create a Dashboard in Grafana
+Press enter or click to view image in full size
+
+let’s create a Dashboard by importing
+click on Import and import the dashboard with numbers
+
+Press enter or click to view image in full size
+
+Press enter or click to view image in full size
+
+there are plenty of ready templates to use the pre-existing templates and modify based on our desired
+it uses a Prometheus
+
+Press enter or click to view image in full size
+
+click on the Import
+
+Press enter or click to view image in full size
+
+the Entire data of the cluster
+where we can able to see the entire data of the EKS cluster
+1. CPU and RAM use
+2. pods in a specific namespace
+
+Press enter or click to view image in full size
+
+3. Pod up history
+4. HPA
+5. Resources by Container
+
+Press enter or click to view image in full size
+
+CPU used by container & limits
+network bandwidth & packet rate
+
+Note: we can deploy the Grafana and Prometheus with a different method
+1. Create all configuration files of both Prometheus and Grafana and execute them in the right order.
+
+2. Prometheus Operator — to simplify and automate the configuration and management of the Prometheus monitoring stack running on a Kubernetes cluster
+
+3. Helm chart — Using helm to install Prometheus Operator including Grafana
+
+Configuring Alerts with PagerDuty
+Step 1: Log in to PagerDuty
+Go to the PagerDuty website: https://www.pagerduty.com/.
+Log in to your PagerDuty account using your credentials.
+Step 2: Create a New Service (If needed)
+If you don’t have a service already set up in PagerDuty, follow these steps to create one:
+
+Press enter or click to view image in full size
+
+Services Page in Pager Duty.
+
+In PagerDuty, navigate to the Services tab.
+Click + New Service.
+Enter the required details for the service (e.g., service name).
+Press enter or click to view image in full size
+
+4. Under Integration Type, choose Events API v2 (this is the integration type you’ll use to send alerts from Grafana).
+
+5. Click Add Service.
+
+Step 3: Obtain the Integration Key
+After creating the service, you will be directed to the service’s Configuration page.
+Scroll down to the Integrations section.
+Press enter or click to view image in full size
+
+Integration Settings on Pagerduty
+
+3. Under Integration Settings, you will see the Integration Key.
+
+This key is unique to the service you just created and will be used in Grafana to send alerts to PagerDuty.
+Copy the Integration Key provided.
+Step 5: Use the Integration Key in Grafana
+Now that you have the integration key, go back to Grafana and use it to set up the PagerDuty notification channel as I outlined earlier.
+
+5.1 Add PagerDuty Integration
+Go to Alerting > Contact Point.
+Add Contact Point.
+Name it PagerDuty Alerts.
+Select PagerDuty as the type.
+Enter your PagerDuty Integration Key.
+Click Save.
+5.2 Create a High CPU Usage Alert
+Go to Alerting > Alert Rules.
+Click + Create Alert Rule.
+Name it High CPU Usage Alert.
+Add query:
+100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+Set condition:
+When last value is above 90
+For duration: 1 minute
+2. Under Notifications, select PagerDuty Alerts.
+
+3. Click Save Alert Rule.
+
+Step 6: Testing Alerts
+Go to Alerting > Alert Rules.
+Click Test Rule.
+If CPU usage exceeds 90%, an alert will trigger.
+Check PagerDuty for incident creation.
+Press enter or click to view image in full size
+
+The Alert was triggered in Pagerduty.
+
+Press enter or click to view image in full size
+
+Resolved the Alert in Pagerduty.
+
+Congratulations! 🎉 You have successfully set up a complete monitoring solution using Prometheus, Grafana, and PagerDuty.
+
+```
+
 
