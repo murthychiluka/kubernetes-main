@@ -1,20 +1,36 @@
-apiVersion: apps/v1
+
+        apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-preferred
+  name: nginx-pref-deployment
+  labels:
+    key: app
+    value: blue
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx-preferred
+      key: app
+      value: blue
   template:
     metadata:
       labels:
-        app: nginx-preferred
+        key: app
+        value: blue
     spec:
+      containers:
+      - name: nginx
+        image: nginx
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: size
+                operator: In
+                values:
+                - medium
           - weight: 50
             preference:
               matchExpressions:
@@ -22,15 +38,3 @@ spec:
                 operator: In
                 values:
                 - small
-
-          - weight: 10
-            preference:
-              matchExpressions:
-              - key: size
-                operator: In
-                values:
-                - medium
-
-      containers:
-      - name: nginx
-        image: nginx
