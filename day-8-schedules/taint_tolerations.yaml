@@ -18,7 +18,7 @@ spec:
         - name: nginx
           image: nginx
       tolerations:
-        - key: "app"
+        - key: "env"
           operator: "Equal"
-          value: "blue"
+          value: "prod"
           effect: "NoSchedule"
